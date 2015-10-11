@@ -27,7 +27,7 @@ loading_rate = 0.2;                                                         %µ¥Î
 total_number =144;
 %%%%%%%%%%%%%%%%%%%%%%ÌáÈ¡Ö±·½Í¼ÖĞµÄÊı¾İ
 figure;
-NI_h = histogram(NI_f);
+NI_h = histogram(NI_f,'BinMethod','fd');
 %Á¦Öµ·Ö²¼Ö±·½Í¼
 bin_number =NI_h.NumBins;
 bin_width = NI_h.BinWidth;%´ı¶¨
@@ -36,8 +36,9 @@ NI_counts = NI_h.Values';
 %¹éÒ»»¯£¬²»¹éÒ»»¯ÓÃevans×ö¸öÄñ°¡
 NI_counts_normal = NI_counts./sum(NI_counts);
 
+%ĞŞ¸ÄÁËhist µÄÉú³É·½·¨£¬²ÉÓÃfreedman·¨Ôò£¬Ê¹Æä¸üÊÊÓÃÓÚÍÏÎ²µÄÊı¾İ
 figure;
-IU_h = histogram(IU_f);
+IU_h = histogram(IU_f,'BinMethod','fd');
 %Á¦Öµ·Ö²¼Ö±·½Í¼
 bin_number_IU =IU_h.NumBins;
 bin_width_IU = IU_h.BinWidth;%´ı¶¨

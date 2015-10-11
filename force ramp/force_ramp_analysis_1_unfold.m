@@ -1,4 +1,4 @@
-%本脚本用来将非平衡态force ramp的数据进行分段，并和力值作图，再做step上的拟合，最后记录下break point 的位置
+%本脚本用来将单个G4 DNA非平衡态force ramp的数据进行分段，并和力值作图，再做step上的拟合，最后记录下break point 的位置
 
 
 %非平衡态分析，基于二态数据，统计G4结构的寿命（持续时间）
@@ -207,13 +207,11 @@ start_end_number(:,2) = start_end_number(:,2)-10;
 % 设定结果矩阵和加载率,这里保存跃变位置的z值，有时跃变有来回跳动，因此*10确保足够的空间。
 z_NI = zeros(segment_number*10,1);
 z_IN = z_NI;
-z_IU = z_NI;
-z_UI = z_NI;
+
 %j 是数据存储的序号，与i同起点但不同增速，增速取决于跃变数
 j_NI = 1;
 j_IN = 1;
-j_IU = 1;
-j_UI = 1;
+
 loading_rate = '0.2pN';
 %% 分别对每个ramp过程进行处理
 %询问是否处理force ramp 曲线
@@ -300,49 +298,9 @@ trajectory_count = 0;
             j_IN = j_IN+n;
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % 紧接着提取IU 展开的数据
-        disp('是否有未记录的IU展开？')
-        disp(num2str(i))
-        disp('IU')
-        yes_or_no = input('有几个IU ','s');
-        n = round(str2double(yes_or_no));
-        %提取展开位置的x坐标，换算成zmag，后期统一换算成力值，存入结果矩阵
-        if yes_or_no == '0'
-            z_IU(j_IU)=0;
-            j_IU = j_IU+1;
-        %增加一个中途退出功能
-        elseif strcmp(yes_or_no,'exit')
-              break;
-        else
-            [jump_x,~] = ginput(n);
-            %提取展开瞬间的力值，存入结果矩阵
-            for t =1:n
-                z_IU(j_IU+t-1) = zmag_ramp(round(jump_x(t,1)));
-            end
-            j_IU = j_IU+n;
-        end
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % 紧接着提取IN 展开的数据
-        disp('是否有未记录的UI展开？')
-        disp(num2str(i))
-        disp('UI')
-        yes_or_no = input('有几个UI ','s');
-        n = round(str2double(yes_or_no));
-        %提取展开位置的x坐标，换算成zmag，后期统一换算成力值，存入结果矩阵
-        if yes_or_no == '0'
-            z_UI(j_UI)=0;
-            j_UI = j_UI+1;
-        %增加一个中途退出功能
-        elseif strcmp(yes_or_no,'exit')
-              break;
-        else
-            [jump_x,~] = ginput(n);
-            %提取展开瞬间的力值，存入结果矩阵
-            for t =1:n
-                z_UI(j_UI+t-1) = zmag_ramp(round(jump_x(t,1)));
-            end
-            j_UI = j_UI+n;
-        end
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %跳出循环的总开关
         elseif strcmp(good_data,'exit')
@@ -355,10 +313,9 @@ trajectory_count = 0;
     %消除0元素，保存有用的结果。
     z_NI(z_NI==0)=[];
     z_IN(z_IN==0)=[];
-    z_IU(z_IU==0)=[];
-    z_UI(z_UI==0)=[];
-    force_ramp_name = strcat('force_ramp_NI',name_save,'_',loading_rate);
-    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','z_IU','z_UI','trajectory_count');
+
+    force_ramp_name = strcat('force_ramp_NI_G4_',name_save,'_',loading_rate);
+    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','trajectory_count');
 
 
 close all;
