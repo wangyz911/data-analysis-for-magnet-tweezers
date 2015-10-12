@@ -209,7 +209,8 @@ z_NI = zeros(segment_number*10,1);
 z_IN = z_NI;
 z_IU = z_NI;
 z_UI = z_NI;
-%j 是数据存储的序号，与i同起点但不同增速，增速取决于跃变数
+%j 是数据存储的序号，与i同起点但不同增速，增速取决于跃变数, 大J是个记录矩阵，记录序号的变化，通过这一变化可以在事后还原出每根线的跃变情况
+J_record = zeros(segment_number*10,4);
 j_NI = 1;
 j_IN = 1;
 j_IU = 1;
@@ -235,7 +236,8 @@ trajectory_count = 0;
         N = size(data_ramp,1);
         %索引出磁铁位置，并转换为力值
         zmag_ramp = magnet_z_position(start_end_number(i,1):start_end_number(i,2));
-        force_ramp = force_zmag(zmag_ramp);
+        % 此处采用车师兄的力值校准数据
+        force_ramp = force_zmag_che(zmag_ramp);
 
         %用小波滤波平滑曲线
         data_ramp_d = sigDEN5(data_ramp);
@@ -277,6 +279,7 @@ trajectory_count = 0;
             end
             j_NI = j_NI+n;
         end
+        J_record(i,1) = j_NI;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % 紧接着提取IN 展开的数据
         disp('是否有未记录的IN展开？')
@@ -299,6 +302,7 @@ trajectory_count = 0;
             end
             j_IN = j_IN+n;
         end
+        J_record(i,2) = j_IN;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % 紧接着提取IU 展开的数据
         disp('是否有未记录的IU展开？')
@@ -321,6 +325,7 @@ trajectory_count = 0;
             end
             j_IU = j_IU+n;
         end
+        J_record(i,3) = j_IU;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % 紧接着提取IN 展开的数据
         disp('是否有未记录的UI展开？')
@@ -343,6 +348,7 @@ trajectory_count = 0;
             end
             j_UI = j_UI+n;
         end
+        J_record(i,4) = j_UI;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %跳出循环的总开关
         elseif strcmp(good_data,'exit')
@@ -358,7 +364,7 @@ trajectory_count = 0;
     z_IU(z_IU==0)=[];
     z_UI(z_UI==0)=[];
     force_ramp_name = strcat('force_ramp_NI',name_save,'_',loading_rate);
-    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','z_IU','z_UI','trajectory_count');
+    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','z_IU','z_UI','J_record','trajectory_count');
 
 
 close all;

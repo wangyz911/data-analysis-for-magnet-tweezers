@@ -209,6 +209,7 @@ z_NI = zeros(segment_number*10,1);
 z_IN = z_NI;
 
 %j 是数据存储的序号，与i同起点但不同增速，增速取决于跃变数
+J_record = zeros(segment_number*10,2);
 j_NI = 1;
 j_IN = 1;
 
@@ -233,7 +234,8 @@ trajectory_count = 0;
         N = size(data_ramp,1);
         %索引出磁铁位置，并转换为力值
         zmag_ramp = magnet_z_position(start_end_number(i,1):start_end_number(i,2));
-        force_ramp = force_zmag(zmag_ramp);
+        % 此处采用车师兄的力值校准数据，因为加载率是以车师兄的编译程序设定的
+        force_ramp = force_zmag_che(zmag_ramp);
 
         %用小波滤波平滑曲线
         data_ramp_d = sigDEN5(data_ramp);
@@ -275,6 +277,7 @@ trajectory_count = 0;
             end
             j_NI = j_NI+n;
         end
+        J_record(i,1) = j_NI;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % 紧接着提取IN 展开的数据
         disp('是否有未记录的IN展开？')
@@ -297,6 +300,7 @@ trajectory_count = 0;
             end
             j_IN = j_IN+n;
         end
+        J_record(i,2) = j_IN;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -315,7 +319,7 @@ trajectory_count = 0;
     z_IN(z_IN==0)=[];
 
     force_ramp_name = strcat('force_ramp_NI_G4_',name_save,'_',loading_rate);
-    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','trajectory_count');
+    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','J_record','trajectory_count');
 
 
 close all;
