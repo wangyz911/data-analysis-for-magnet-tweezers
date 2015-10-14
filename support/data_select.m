@@ -1,7 +1,5 @@
-%本脚本用来将单个G4 DNA非平衡态force ramp的数据进行分段，并和力值作图，再做step上的拟合，最后记录下break point 的位置
+% 本脚本用于从原始数据中取出现象明显的片段，并集中作图。
 
-
-%非平衡态分析，基于二态数据，统计G4结构的寿命（持续时间）
 %% -------------------------读取数据文件---------------------------
 clear;
 close all;
@@ -146,68 +144,31 @@ hold off
 subplot(2,1,2);
 plot(time(start_number:end_number),magnet_z_position(start_number:end_number));
 xlabel('time(min)');ylabel('magnet');
-%%  利用find函数找出force ramp 区间的数据，并且分段
+%%  利用find函数找出force ramp 区间的数据，并且分段，采用函数形式
 %找出 force_ramp 态, 注意zmag值都是负的，要用加号
 %绷紧态坐标，可修改
 ramp_start = -0.948 ;
-%找出磁铁在ramp起点值以上的部分，即ramp部分
-tension_index = find(magnet_z_position(start_number:end_number) - ramp_start > 0);
-
-%对ramp部分进行差分，差分数来大于1的坐标点就是不同区间的断点
-diff_tension_index = diff(tension_index);
-%得到断点坐标，注意这里是对diff的坐标，而diff（break_point）才是zmag中的坐标
-break_point = find(diff_tension_index>10);
-%提取每一段的长度
-segment_length = zeros(size(break_point,1),1);
-segment_length(1) = break_point(1);
-segment_length(2:end) = diff(break_point);
-%得到分段数，预制结果矩阵
-segment_number = size(break_point,1) + 1;
-start_end_number = zeros(segment_number,2);
-%对绷紧态的数据进行分段，分段的起点和终点保存在start_end_number矩阵中
-for i = 1:segment_number
-    if i ==1
-        start_end_number(i,1) = tension_index(1) + start_number;
-        start_end_number(i,2) = start_end_number(i,1) + segment_length(i);
-        %对第一段来说，起点是总起点，终点是第一个diff点（diff函数自动使得结果坐标左移一位）
-        
-    elseif i<segment_number
-        %对中间段，第i段的起点是第i-1段终点加上对应的diff值,终点是第i段的起点加上这一段的长度diff(break_point)
-        start_end_number(i,1) = start_end_number(i-1,2) + diff_tension_index(break_point(i-1));
-        start_end_number(i,2) = start_end_number(i,1)+ segment_length(i);
-    else 
-        start_end_number(i,1) = start_end_number(i-1,2) + diff_tension_index(break_point(i-1));
-        start_end_number(i,2) = tension_index(end) + start_number;
-    end
-end
-%减去首尾5个点，消除一些振荡产生的坏点
-start_end_number(:,1) = start_end_number(:,1)-100;
-start_end_number(:,2) = start_end_number(:,2)-10;
-% 设定结果矩阵和加载率,这里保存跃变位置的z值，有时跃变有来回跳动，因此*10确保足够的空间。
-z_NI = zeros(segment_number*10,1);
-z_IN = z_NI;
-
-%j 是数据存储的序号，与i同起点但不同增速，增速取决于跃变数
-J_record = zeros(segment_number*10,2);
-j_NI = 1;
-j_IN = 1;
+%用一个集成的函数来得到结果，保证脚本的简洁。
+[start_end_number,segment_number] = data_separation_for_ramp(ramp_start,magnet_z_position(start_number:end_number),start_number);
 
 loading_rate = '0.2pN';
+
 %% 分别对每个ramp过程进行处理
 %询问是否处理force ramp 曲线
-disp('是否分析 force ramp 曲线？')
-yes_ramp = input('是或者否','s');
+disp('要进行数据挑选吗？')
+yes_ramp = input('是（1）或者否（0）','s');
 if yes_ramp == '1' 
+    disp('数据共分几类？');
+    kind_number = str2double(input('数据种类 = ','s'));
+    ramp1_name = 'jump_3-6_';
+    ramp2_name = 'jump_3-9_';
+    ramp3_name = 'jump_6-9_';
+    ramp4_name = 'jump_6-6_';
+    kind = zeros(segment_number,kind_number);
     
-    %可选择从第几段开始分析
-    disp('从第几段开始进行分析？(第一次只能从头开始)')
-yes_segment = input('第几段 = ','s');
-
-start_segment_num = round(str2double(yes_segment));
-
-trajectory_count = 0;
-
-    for i = start_segment_num : segment_number
+    trajectory_count = 0;
+        figure;
+    for i = 1 : segment_number
         %按zmag坐标索引出Z的轨迹
         data_ramp = DNA_z_position_modi(start_end_number(i,1):start_end_number(i,2));
         N = size(data_ramp,1);
@@ -219,7 +180,7 @@ trajectory_count = 0;
         %用小波滤波平滑曲线
         data_ramp_d = sigDEN5(data_ramp);
         %对拟合曲线作图，同时在右侧拟出力值
-        figure;
+
         subplot(1,2,1)
         plot(1:N,data_ramp,1:N,data_ramp_d,'LineWidth',2);
         subplot(1,2,2)
@@ -229,78 +190,42 @@ trajectory_count = 0;
         %需要有一个是否处理的总开关
         disp(num2str(i))
         disp('good data ? ？')
-        
         good_data = input('good or bad','s');
         if good_data =='1'
         %然后是每一种数据是否记录                    
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %提取NI部分的展开数据
-        disp('是否有未记录的NI展开？')
-        disp(num2str(i))
-        disp('NI')
-        yes_or_no = input('有几个NI ','s');
-        n = round(str2double(yes_or_no));
-        %提取展开位置的x坐标，换算成zmag，后期统一换算成力值，存入结果矩阵
-        if yes_or_no == '0'
-            z_NI(j_NI)=0;
-            j_NI = j_NI+1;
-        %增加一个中途退出功能
-        elseif strcmp(yes_or_no,'exit')
-              break;
-        else
-            trajectory_count = trajectory_count+1;
-            [jump_x,~] = ginput(n);
-            %提取展开瞬间的Z轴位置，存入结果矩阵
-            for t =1:n
-                z_NI(j_NI+t-1) = zmag_ramp(round(jump_x(t,1)));
-            end
-            j_NI = j_NI+n;
+        % 记录跃变类型，并当场保存切分好的raw data
+        disp('which category : 3-6  3-9  6-9  6-6')
+        data_kind = str2double(input(' = ','s'));
+        switch data_kind
+            case 1
+                data_save_name = strcat(ramp1_name,num2str(i),'_',name_save,'.mat');
+            case 2
+                data_save_name = strcat(ramp2_name,num2str(i),'_',name_save,'.mat');
+            case 3
+                data_save_name = strcat(ramp3_name,num2str(i),'_',name_save,'.mat');
+            case 4
+                data_save_name = strcat(ramp4_name,num2str(i),'_',name_save,'.mat');
+            otherwise
+                continue;
         end
-        J_record(i,1) = j_NI;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % 紧接着提取IN 展开的数据
-        disp('是否有未记录的IN展开？')
-        disp(num2str(i))
-        disp('IN')
-        yes_or_no = input('有几个IN ','s');
-        n = round(str2double(yes_or_no));
-        %提取展开位置的x坐标，换算成zmag，后期统一换算成力值，存入结果矩阵
-        if yes_or_no == '0'
-            z_IN(j_IN)=0;
-            j_IN = j_IN+1;
-        %增加一个中途退出功能
-        elseif strcmp(yes_or_no,'exit')
-              break;
-        else
-            [jump_x,~] = ginput(n);
-            %提取展开瞬间的力值，存入结果矩阵
-            for t =1:n
-                z_IN(j_IN+t-1) = zmag_ramp(round(jump_x(t,1)));
-            end
-            j_IN = j_IN+n;
-        end
-        J_record(i,2) = j_IN;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %跳出循环的总开关
-        elseif strcmp(good_data,'exit')
-              break;
+        save(data_save_name,'data_ramp','zmag_ramp','force_ramp');
+        kind(i,data_kind) = i;
 
         end
     end
     
-%% 提取完一根数据的所有结果后，保存结果
-    %消除0元素，保存有用的结果。
-    z_NI(z_NI==0)=[];
-    z_IN(z_IN==0)=[];
-
-    force_ramp_name = strcat('force_ramp_NI_G4_',name_save,'_',loading_rate);
-    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','J_record','trajectory_count');
-
-
-close all;
 end
+
+save(name_save,'kind');
+    
+
+        
+    
+
+        
+    
+
+
+
 
