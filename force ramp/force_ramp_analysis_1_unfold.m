@@ -199,14 +199,15 @@ disp('是否分析 force ramp 曲线？')
 yes_ramp = input('是或者否','s');
 if yes_ramp == '1' 
     
-    %可选择从第几段开始分析
-    disp('从第几段开始进行分析？(第一次只能从头开始)')
+%可选择从第几段开始分析
+disp('从第几段开始进行分析？(第一次只能从头开始)')
 yes_segment = input('第几段 = ','s');
 
 start_segment_num = round(str2double(yes_segment));
 
 trajectory_count = 0;
-
+        %figure 放在外面，解决不断要关闭图像页面的问题
+        figure;
     for i = start_segment_num : segment_number
         %按zmag坐标索引出Z的轨迹
         data_ramp = DNA_z_position_modi(start_end_number(i,1):start_end_number(i,2));
@@ -219,7 +220,6 @@ trajectory_count = 0;
         %用小波滤波平滑曲线
         data_ramp_d = sigDEN5(data_ramp);
         %对拟合曲线作图，同时在右侧拟出力值
-        figure;
         subplot(1,2,1)
         plot(1:N,data_ramp,1:N,data_ramp_d,'LineWidth',2);
         subplot(1,2,2)
