@@ -1,4 +1,4 @@
-function [ down, up ] = dwell_time_count( data_z )
+function [ dwell_time_down,dwell_time_up,down, up ] = dwell_time_count( data_z )
 %本函数用于进行step的拟合，过滤，驻留时间的统计，并最终给出驻留时间的指数拟合图像和特征时间，仅用于二态统计。
 %使用时根据实际情况修改stepcheck和length_check的大小。
 %% 对得到的数据进行滤波处理，并分类进行指数拟合

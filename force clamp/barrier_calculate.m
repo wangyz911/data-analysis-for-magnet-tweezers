@@ -1,5 +1,5 @@
 function [ dx_folded, dx_unfolded ] = barrier_calculate( lifetime )
-%已知驻留时间，计算反应势垒
+%已知驻留时间，计算反应势垒 历史使命已完成，并入了dwell_time_analysis脚本，以后或许会被其他脚本调用，但输入参数的格式很蛋疼。
 %   Detailed explanation goes here
 
 %% 得到数据

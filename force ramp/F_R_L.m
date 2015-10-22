@@ -25,7 +25,7 @@ bin_number =NI_h.NumBins;
 bin_width = NI_h.BinWidth;%待定
 force =NI_h.BinEdges';                                                         %这里力值序列应该等于贯穿整个force
 NI_counts = NI_h.Values';
-% %归一化，不归一化用evans做个鸟啊 NI_counts_normal = NI_counts./sum(NI_counts);
+
 %用来存放结果的矩阵
 trajectory_number_N = zeros(bin_number,1);
 
@@ -48,6 +48,8 @@ for k = 1:bin_number
     %     UI_counts(k)/(trajectory_number_U(k,1)*bin_width);
     
 end
+NI_log = log(NI_rate);
+
 %
 %
 % NI_p = [-6,2]; NI_rate_log = log(NI_rate); % NI_parameter_fit =
