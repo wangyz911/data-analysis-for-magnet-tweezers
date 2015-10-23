@@ -1,4 +1,4 @@
-function [ ssDNA_length ] = ssDNA_length( nt_number, f )
+function [ ssDNA_length ] = ssDNA_length2( nt_number, f )
 % 本函数是严洁老师采用的一个新的计算公式，与他之前的工作用的公式不同，也许能算出更为满意的结果
 %% 设定一些公式的参数
 %碱基数,nm
