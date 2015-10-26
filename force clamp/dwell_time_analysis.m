@@ -202,8 +202,11 @@ if yes_or_no_string1=='1'                                                  %计算
             step_mag = step_mag(step_mag >start_number&step_mag <end_number);
 
             data_z=DNA_z_position_modi(step_mag);                             %同时提取修正的Z信息和小波滤波的Z信息
+            data_y=DNA_y_position_modi(step_mag);
             % 对 data_z进行驻留时间分析，提取出拟合参数
-            [~,~,down,up] = dwell_time_count(data_z);
+            [data_d,down,up] = dwell_time_count(data_z);
+            % 如果down不是0，说明没有跳过这一段分析，则执行后续，如果是0,则跳入下一循环。
+            if down~=0
             k_unfold = 1/down.mu;
             k_fold  = 1/up.mu;
 
@@ -243,6 +246,7 @@ if yes_or_no_string1=='1'                                                  %计算
             save(new_data_name_y,'data_y');
             % clear data_4_analysis;
             % clear data_input;
+            end
             deal_number=deal_number+1;
             time_number=time_number+1;
             mean_mag = mean_mag + stepsize;
@@ -261,8 +265,8 @@ k_fold_line(k_fold_line==0)=[];
 k_u_log = log(k_unfold_line);
 k_f_log = log(k_fold_line);
 % 对反应速率做线性拟合得到dx 和 dG（还需修正成为自然情况下dGO）.
-fit_fold = polyfit(force_line,k_f_log,1);
-fit_unfold = polyfit(force_line,k_u_log,1);
+[fit_fold,s_f] = polyfit(force_line,k_f_log,1);
+[fit_unfold,s_u]= polyfit(force_line,k_u_log,1);
 Kb_T = 1.3806504e-2*(T+273.15); 
 % 最终分析结果
 dx_f = fit_fold(1)*Kb_T;
@@ -274,21 +278,22 @@ k0_u = exp(-dG0_u);
 % 自由能还需要减去单链的拉伸自由能和G4拉伸自由能等等，统称G_stretch
 lnK = k_u_log./k_f_log;
 dx_uf = dx_u-dx_f;
-G0 = G0_modi(lnK,force_line,T,dx_uf);
+[G0,G0_uf] = G0_modi(lnK,force_line,T,dx_uf);
 %另一种方法计算出的G0
 G0_u_minus_f = dG0_u - dG0_f;
 
 
-save('dwell_time_results.mat','dx_f','dG0_f','dx_u','dG0_u','k0_u','k0_f','G0','G0_u_minus_f');
+save('dwell_time_results.mat','dx_f','dG0_f','dx_u','dG0_u','k0_u','k0_f','G0','G0_u_minus_f','G0_uf','s_u','s_f');
 %作图
     figure;
     hold on;
     plot(force_line,k_u_log,'*');
-    plot(force_line,force_line.*fit_unfold(1)+fit_unfold(2),'b');
+    plot(force_line,polyval(fit_unfold,force_line),'b');
     plot(force_line,k_f_log,'o');
-    plot(force_line,force_line.*fit_fold(1)+fit_fold(2),'r');
+    plot(force_line,polyval(fit_fold,force_line),'r');
     title('rate-force');
     ylabel('k');
     xlabel('force');
+    legend('ku(f)','fit ku(f)','kf(f)','fit kf(f)')
 end
 

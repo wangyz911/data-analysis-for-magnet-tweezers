@@ -150,7 +150,7 @@ xlabel('time(min)');ylabel('magnet');
 disp('---------------需要做步长统计吗？0-不需要；1-需要')
 yes_or_no_string1=input('judge1=','s');                                    %*
 if yes_or_no_string1=='1'                                                  %计算了就画图，没计算就不画
-    new_file_name=strcat(PathName,name_save,'new','_',date,'\');
+    new_file_name=strcat(PathName,name_save,'new_hist','_',date,'\');
     mkdir(new_file_name);                                                      %新建文件夹
     subplot(2,1,1);
     plot(DNA_z_position_modi(start_number:end_number),'DisplayName','DNA_z_position','YDataSource','DNA_z_position');grid on;

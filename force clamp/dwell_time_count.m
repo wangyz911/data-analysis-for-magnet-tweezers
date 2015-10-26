@@ -1,4 +1,4 @@
-function [ dwell_time_down,dwell_time_up,down, up ] = dwell_time_count( data_z )
+function [ fitted_data_modi,down, up ] = dwell_time_count( data_z )
 %本函数用于进行step的拟合，过滤，驻留时间的统计，并最终给出驻留时间的指数拟合图像和特征时间，仅用于二态统计。
 %使用时根据实际情况修改stepcheck和length_check的大小。
 %% 对得到的数据进行滤波处理，并分类进行指数拟合
@@ -28,8 +28,11 @@ N = size(data_z,1);
         fitted_data_modi = get_fitted_data(data_z,step_position);
         figure;
         plot(1:N,data_z,1:N,fitted_data_modi,'LineWidth',2);
-            
-            
+       %增加一个缓冲机制，用户可以选择是否对这一段数据进行分析，有的数据有漂移，不是很好，不应该采用。
+       disp('good data ?')
+       good = input('1 or 0');
+       if good == '1'
+           
        
        
        
@@ -50,6 +53,10 @@ N = size(data_z,1);
 
            %对统计的时间做指数拟合
            [down,up] = createFit(dwell_time_down,dwell_time_up);
+       else
+           down = 0;
+           up = 0;
+       end
 
 end
 
