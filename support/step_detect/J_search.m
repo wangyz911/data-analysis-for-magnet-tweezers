@@ -10,8 +10,9 @@ STEP_POSITION = zeros(data_size,1);
 %利用函数进行递归搜索
 local_step_search(data_z, 1 , weight);
 %输出搜索结果
-step_position = STEP_POSITION;
-
+search_result = STEP_POSITION;
+%得到step的位置和个数
+step_position = find(search_result==1);
 end
 
 function local_step_search(data ,start_point , n)

@@ -1,4 +1,4 @@
-function [ fitted_data_modi,down, up ] = dwell_time_count( data_z )
+function [ fitted_data_modi,down, up,good ] = dwell_time_count( data_z )
 %本函数用于进行step的拟合，过滤，驻留时间的统计，并最终给出驻留时间的指数拟合图像和特征时间，仅用于二态统计。
 %使用时根据实际情况修改stepcheck和length_check的大小。
 %% 对得到的数据进行滤波处理，并分类进行指数拟合
@@ -30,8 +30,8 @@ N = size(data_z,1);
         plot(1:N,data_z,1:N,fitted_data_modi,'LineWidth',2);
        %增加一个缓冲机制，用户可以选择是否对这一段数据进行分析，有的数据有漂移，不是很好，不应该采用。
        disp('good data ?')
-       good = input('1 or 0');
-       if good == '1'
+       good = str2double(input('1 or 0','s'));
+       if good == 1
            
        
        
@@ -42,10 +42,36 @@ N = size(data_z,1);
            disp('取点说明，请取尽量明确区分两个态的中间的点')
            [~,threshold_y] = ginput(1);
 %            threshold_y = (max(step_info(:,2))+min(step_info(:,2)))/2;
-           segment_down = step_info(:,2) < threshold_y(1,1);
+% 需要想办法合并被隔在同一区间相邻段的驻留时间。
            segment_up = step_info(:,2) > threshold_y(1,1);
-           dwell_time_down = step_info(segment_down,1);
-           dwell_time_up = step_info(segment_up,1);
+           % 先用差分的方法找到边缘，对于up，-1是下降沿，1是上升沿，对于down则相反。
+           dif_up = diff(segment_up);
+           % 预设置一个结果矩阵，第一行用来存放合并后每段的长度，第二段用来存放合并后的均值。更极端的情况下，可以直接对up
+           % 和down 求加权平均。
+           smooth_up = zeros(size(segment_up,1),2);
+           smooth_down = zeros(size(segment_up,1),2);
+           
+           k_up = 1;
+           k_down = 1;
+           for p = 1:size(dif_up,1)
+               if dif_up(p)==-1
+                   %找到下边缘（合并终点），长度合并，取值做加权平均
+                   smooth_up(p,1) = sum(step_info(k_up:p,1));
+                   smooth_up(p,2) = step_info(k_up:p,2)'*step_info(k_up:p,1)/smooth_up(p,1);
+                   k_down = p+1;
+               elseif dif_up(p)==1
+                   %找到上边缘（合并起点），重置新的起点，注意差分的值跟实际的坐标相差一个，所以实际坐标是差分坐标+1
+                   k_up = p+1;
+                   smooth_down(p,1) = sum(step_info(k_down:p,1));
+                   smooth_down(p,2) = step_info(k_down:p,2)'*step_info(k_down:p,1)/smooth_up(p,1);
+               end
+           end
+        
+           dwell_time_down = smooth_down(:,1);
+           dwell_time_up = smooth_up(:,1);
+           dwell_time_down(dwell_time_down==0)=[];
+           dwell_time_up(dwell_time_up==0)=[];
+           
 
 
            dwell_time_up = dwell_time_up./60;

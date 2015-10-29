@@ -5,9 +5,7 @@ function [ fitted_data ,step_info] = find_step( data_z )
 % N = size(data_z,1);
 
 %% 开始使用二分法迭代，得到全局最优的J
-search_result = J_search(data_z,0.7);
-%得到step的位置和个数
-step_position = find(search_result==1);
+step_position = J_search(data_z,0.7);
 % step_count = size(step_position,1);
 %% 根据找到的step位置得到拟合曲线
 fitted_data = get_fitted_data(data_z,step_position);

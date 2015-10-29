@@ -187,10 +187,8 @@ if yes_or_no_string1=='1'                                                  %计算
             stepsize = str2double(s);
             
              %预设置保存分析结果的矩阵，大小由分析区间和台阶大小决定
-            dwell_time_curve=zeros(ceil((step_end_y-step_first_y)/stepsize),4);            %力值曲线，分别用来保存zmag，力值，k_unfold,k_fold。
-   %预设好作图和计算的各种参数         
-    fig=3;                                                                     %设定图像标号和子图标号
-    subfig=1;
+            dwell_time_curve=zeros(ceil((step_end_y-step_first_y)/stepsize),6);            %力值曲线，分别用来保存zmag，力值，k_unfold,k_fold。       
+
     time_number=1;                                                                  %总序号，力值曲线需要用
     DNA_length=1.034;                                                           %定义L，轮廓长度，单位是微米
     Kb_multi_T=1.3806504e-2*(T+273.15);                                     %k_B*T, 换成了pN*nm之后数量级降到-2，结果为4.128pN*nm
@@ -204,9 +202,9 @@ if yes_or_no_string1=='1'                                                  %计算
             data_z=DNA_z_position_modi(step_mag);                             %同时提取修正的Z信息和小波滤波的Z信息
             data_y=DNA_y_position_modi(step_mag);
             % 对 data_z进行驻留时间分析，提取出拟合参数
-            [data_d,down,up] = dwell_time_count(data_z);
+            [data_d,down,up,good] = dwell_time_count(data_z);
             % 如果down不是0，说明没有跳过这一段分析，则执行后续，如果是0,则跳入下一循环。
-            if down~=0
+            if good ==1
             k_unfold = 1/down.mu;
             k_fold  = 1/up.mu;
 
