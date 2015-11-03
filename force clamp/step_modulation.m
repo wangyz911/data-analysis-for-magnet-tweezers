@@ -1,4 +1,4 @@
-function [ stepsize,state_num,step_std ] = step_modulation( data_z,step_position)
+function [ fitted_data,stepsize,step_std ] = step_modulation( data_z,step_position)
 % 本函数用来对最小卡方查找step的方法进行一些补充，通过鼠标确认到底有几个台，阈值位置在哪儿，然后对属于同一个态的小step进行值的平均和长度的叠加。
 %参数介绍：输入参数：data_z是原始数据，用来对照fitted_data
 %的拟合情况。step_position是step_detect的第一步结果。

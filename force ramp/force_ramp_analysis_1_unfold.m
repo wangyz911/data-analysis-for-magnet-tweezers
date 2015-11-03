@@ -42,7 +42,7 @@ fgetl(fid);
 DNA_z_position_array=textscan(fid,'%f%f');                                 %读取z方向数据
 DNA_z_position=DNA_z_position_array{1,2};
 % 读取参考小球的XYZ信息
-disp('---------------一、读取参考小球XYZ的数据：-------------------------------')
+disp('---------------二、读取参考小球XYZ的数据：-------------------------------')
 [FileName2,PathName2] = uigetfile('.gr','位置数据文件');                      %标准的打开文件对话框，第一参数为文件格式，第二参数为对话框名……
 file=strcat(PathName2,FileName2);                                            %连接路径名，文件名，为调用做准备。
 fid=fopen(file, 'r');                                                      %读取文件，文件名及路径如上。
@@ -78,7 +78,7 @@ fgetl(fid);
 ref_DNA_z_position_array=textscan(fid,'%f%f');                                 %读取z方向数据
 ref_DNA_z_position=ref_DNA_z_position_array{1,2};
 %读取磁铁数据
-disp('---------------二、读取磁铁z方向移动的数据：--------------------------')
+disp('---------------三、读取磁铁z方向移动的数据：--------------------------')
 [FileName3,PathName3] = uigetfile('.gr','磁铁移动的数据文件');
 file=strcat(PathName3,FileName3);fid=fopen(file, 'r');
 standard_string='abcd';
@@ -186,9 +186,14 @@ start_end_number(:,2) = start_end_number(:,2)-10;
 % 设定结果矩阵和加载率,这里保存跃变位置的z值，有时跃变有来回跳动，因此*10确保足够的空间。
 z_NI = zeros(segment_number*10,1);
 z_IN = z_NI;
+% 设定保存jump步长的结果矩阵
+step_NI = zeros(segment_number*10,1);
+step_IN = step_NI;
 
 %j 是数据存储的序号，与i同起点但不同增速，增速取决于跃变数
 J_record = zeros(segment_number*10,2);
+% 用于数有多少条轨迹的计数器。
+trajectory_count = 0;
 j_NI = 1;
 j_IN = 1;
 
@@ -242,17 +247,21 @@ trajectory_count = 0;
         n = round(str2double(yes_or_no));
         %提取展开位置的x坐标，换算成zmag，后期统一换算成力值，存入结果矩阵
         if yes_or_no == '0'
-            z_NI(j_NI)=0;
+            z_NI(j_NI) = 0;
+            step_NI(j_NI) = 0;
             j_NI = j_NI+1;
         %增加一个中途退出功能
         elseif strcmp(yes_or_no,'exit')
               break;
         else
             trajectory_count = trajectory_count+1;
-            [jump_x,~] = ginput(n);
+            [jump_x,jump_y] = ginput(n);
             %提取展开瞬间的Z轴位置，存入结果矩阵
             for t =1:n
-                z_NI(j_NI+t-1) = zmag_ramp(round(jump_x(t,1)));
+                jump = round(jump_x(t,1));
+                z_NI(j_NI+t-1) = zmag_ramp(jump);
+                % 增加了对步长的统计，要求采jump点时点在展开点上沿。
+                step_NI(j_NI+t-1) = mean(data_ramp_d(jump:(jump+3))) - mean(data_ramp_d((jump-5):(jump-2)));
             end
             j_NI = j_NI+n;
         end
@@ -275,7 +284,9 @@ trajectory_count = 0;
             [jump_x,~] = ginput(n);
             %提取展开瞬间的力值，存入结果矩阵
             for t =1:n
-                z_IN(j_IN+t-1) = zmag_ramp(round(jump_x(t,1)));
+                jump = round(jump_x(t,1));
+                z_IN(j_IN+t-1) = zmag_ramp(jump);
+                step_IN(j_IN+t-1) = mean(data_ramp_d(jump:(jump+3))) - mean(data_ramp_d((jump-5):(jump-2)));
             end
             j_IN = j_IN+n;
         end
@@ -296,9 +307,12 @@ trajectory_count = 0;
     %消除0元素，保存有用的结果。
     z_NI(z_NI==0)=[];
     z_IN(z_IN==0)=[];
+    step_NI(step_NI==0)=[];
+    step_IN(step_IN==0)=[];
+    
 
     force_ramp_name = strcat('force_ramp_NI_G4_',name_save,'_',loading_rate);
-    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','J_record','trajectory_count');
+    save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','J_record','trajectory_count','step_NI','step_IN');
 
 
 close all;

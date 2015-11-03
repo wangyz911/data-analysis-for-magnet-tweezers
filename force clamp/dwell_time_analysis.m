@@ -147,7 +147,7 @@ xlabel('time(min)');ylabel('magnet');
 % xlabel('time(min)');ylabel('z_position_filt');
 %% 步长统计分析
 
-disp('---------------需要做驻留时间统计吗？0-不需要；1-需要')
+disp('---------------需要做步长&驻留时间统计吗？0-不需要；1-需要')
 yes_or_no_string1=input('judge1=','s');                                    %*
 if yes_or_no_string1=='1'                                                  %计算了就画图，没计算就不画
     new_file_name=strcat(PathName,name_save,'new','_',date,'\');
@@ -167,11 +167,11 @@ if yes_or_no_string1=='1'                                                  %计算
     DNA_y_position_modi=DNA_y_position-ref_DNA_y_position;                     %跳过算力情况下补充定义y
     DNA_x_position_modi=DNA_x_position-ref_DNA_x_position;                     %定义x
     
-    %请输入试验温度
+%请输入试验温度
     T = input('T = ','s');
     T = str2double(T);
     
-    %划分好分析的起点，终点，步长
+%划分好分析的起点，终点，步长
             disp('---------------请点击驻留时间分析的起点和终点');
         yes_or_no_string2=input('judge1=','s');                                    %*
         if yes_or_no_string2=='1'                                                  %此处是必要的停顿，否则取点函数会锁定到刚画出的图上，我们只能在总图上取点
@@ -182,17 +182,20 @@ if yes_or_no_string1=='1'                                                  %计算
             %初始磁铁位置等于起点的y坐标
             mean_mag = step_first_y(1,1);
         end
-            %设置步长
-            s = input('请输入步长','s');
-            stepsize = str2double(s);
-            
-             %预设置保存分析结果的矩阵，大小由分析区间和台阶大小决定
-            dwell_time_curve=zeros(ceil((step_end_y-step_first_y)/stepsize),6);            %力值曲线，分别用来保存zmag，力值，k_unfold,k_fold。       
+%设置步长
+    s = input('请输入步长','s');
+    stepsize = str2double(s);
 
+     %预设置保存分析结果的矩阵，大小由分析区间和台阶大小决定
+    dwell_time_curve=zeros(ceil((step_end_y-step_first_y)/stepsize),6);            %力值曲线，分别用来保存zmag，力值，k_unfold,k_fold。       
     time_number=1;                                                                  %总序号，力值曲线需要用
     DNA_length=1.034;                                                           %定义L，轮廓长度，单位是微米
     Kb_multi_T=1.3806504e-2*(T+273.15);                                     %k_B*T, 换成了pN*nm之后数量级降到-2，结果为4.128pN*nm
-    %%% 此处 mean_mag == step_end_y的部分未被分析,加上一个小量使得最后一段可以被分析
+    %建立保存结果的excel文档
+fileID = fopen('step_and_std.txt','w');
+fprintf(fileID,'%6s %12s\r\n','step','step_std');
+    
+%% 此处 mean_mag == step_end_y的部分未被分析,加上一个小量使得最后一段可以被分析   
     while mean_mag < (step_end_y+0.001)                                                        %反复分段，直到分完
             %得到一个台阶的序号
             step_mag = find(abs(magnet_z_position-mean_mag)<2E-3);         %最小误差，注意到马达有时候会有移位出错，0.01变成0.009
@@ -201,29 +204,26 @@ if yes_or_no_string1=='1'                                                  %计算
 
             data_z=DNA_z_position_modi(step_mag);                             %同时提取修正的Z信息和小波滤波的Z信息
             data_y=DNA_y_position_modi(step_mag);
+            % 对data_z进行step-detect 工作，结果用于后面的分析。
+            step_position = J_search(data_z,0.7);
+            % 对 data_z进行步长分析，提取出拟合参数
+            [ data_d,step,step_std ] = step_modulation( data_z,step_position);
             % 对 data_z进行驻留时间分析，提取出拟合参数
-            [data_d,down,up,good] = dwell_time_count(data_z);
+            [down,up,good] = dwell_time_count(data_z,step_position);
             % 如果down不是0，说明没有跳过这一段分析，则执行后续，如果是0,则跳入下一循环。
+            % 得到拟合结果后，导出拟合结果，并计算k_fold and k_unfold
             if good ==1
             k_unfold = 1/down.mu;
             k_fold  = 1/up.mu;
-
-
- 
-
-            % 得到拟合结果后，导出拟合结果，并计算k_fold and k_unfold
-            
-
-            
+            fprintf(fileID,'%6.2f %12.8f\r\n',step,step_std);
             %计算力值
             data_z_mean=mean(data_d);           %Z方向均值，即L
-
 %         deviation_y=var(data_y);
 %         %y方向标准差^2=方差,改成了方差函数,已整合到force_estimate中
 %         force=force_estimate(data_y,data_cal_mean); 
 %         force=Kb_multi_T*data_z_mean*1.0e-3/var_correction(data_y,T);    %力值计算，其中对方差进行了积分时间修正
                                                                            %除以1000，单位换算，最后单位是纳米，F单位是pN,为什么+1.4(1.4是2.8微米的球的半径，加上之后才是摆长)
-% 保存计算结果
+% 储存计算结果
             force = force_zmag_che(mean_mag);                                  %用force zmag的关系间接得到force，因为短链的力算不准。
             dwell_time_curve(time_number,1)=time_number;                      %time_curve第1列标明序号
             dwell_time_curve(time_number,2)=data_z_mean;                       %time_curve 第2列输入Z值，也就是extension
@@ -231,10 +231,7 @@ if yes_or_no_string1=='1'                                                  %计算
             dwell_time_curve(time_number,4)=mean_mag;                          %第4列输入Zmag
             dwell_time_curve(time_number,5)=k_unfold;
             dwell_time_curve(time_number,6)=k_fold;
-            
-            
-
-%保存数据
+%保存原始数据
             new_data_name=strcat('data_',num2str(deal_number),'.mat');
             new_data_name_y=strcat('data_y',num2str(deal_number),'.mat');
             new_data_d_name=strcat('data_d','_',num2str(deal_number),'.mat');
@@ -245,12 +242,15 @@ if yes_or_no_string1=='1'                                                  %计算
             % clear data_4_analysis;
             % clear data_input;
             end
+% 进入下一循环，技术+1，步长加一级            
             deal_number=deal_number+1;
             time_number=time_number+1;
             mean_mag = mean_mag + stepsize;
 
 
     end
+    % 循环完成，关闭文件。
+    fclose(fileID);
     save('dwell_time_data.mat','dwell_time_curve');                                     %保存力值-长度信息
 %将得到的F-E曲线作图
 force_line = dwell_time_curve(:,3);
