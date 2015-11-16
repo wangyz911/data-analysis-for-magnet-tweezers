@@ -261,18 +261,19 @@ trajectory_count = 0;
                 jump = round(jump_x(t,1));
                 z_NI(j_NI+t-1) = zmag_ramp(jump);
                 % 增加了对步长的统计，要求采jump点时点在展开点上沿。
-                step_NI(j_NI+t-1) = mean(data_ramp_d(jump:(jump+3))) - mean(data_ramp_d((jump-5):(jump-2)));
+                step_NI(j_NI+t-1) = mean(data_ramp_d(jump+5)) - mean(data_ramp_d((jump-10)));
             end
             j_NI = j_NI+n;
+            
         end
-        J_record(i,1) = j_NI;
+        J_record(i,1) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % 紧接着提取IN 展开的数据
         disp('是否有未记录的IN展开？')
         disp(num2str(i))
         disp('IN')
         yes_or_no = input('有几个IN ','s');
-        n = round(str2double(yes_or_no));
+        n2 = round(str2double(yes_or_no));
         %提取展开位置的x坐标，换算成zmag，后期统一换算成力值，存入结果矩阵
         if yes_or_no == '0'
             z_IN(j_IN)=0;
@@ -281,16 +282,18 @@ trajectory_count = 0;
         elseif strcmp(yes_or_no,'exit')
               break;
         else
-            [jump_x,~] = ginput(n);
+            [jump_x,~] = ginput(n2);
             %提取展开瞬间的力值，存入结果矩阵
-            for t =1:n
+            for t =1:n2
                 jump = round(jump_x(t,1));
                 z_IN(j_IN+t-1) = zmag_ramp(jump);
                 step_IN(j_IN+t-1) = mean(data_ramp_d(jump:(jump+3))) - mean(data_ramp_d((jump-5):(jump-2)));
             end
-            j_IN = j_IN+n;
+            j_IN = j_IN+n2;
+            
         end
-        J_record(i,2) = j_IN;
+        J_record(i,2) = n2;
+ 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

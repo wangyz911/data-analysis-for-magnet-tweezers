@@ -278,7 +278,7 @@ if yes_ramp == '1'
             end
             j_NI = j_NI+n;
         end
-        J_record(i,1) = j_NI;
+        J_record(i,1) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % 紧接着提取IN 展开的数据
         disp('是否有未记录的IN展开？')
@@ -301,7 +301,7 @@ if yes_ramp == '1'
             end
             j_IN = j_IN+n;
         end
-        J_record(i,2) = j_IN;
+        J_record(i,2) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % 紧接着提取IU 展开的数据
         disp('是否有未记录的IU展开？')
@@ -324,7 +324,7 @@ if yes_ramp == '1'
             end
             j_IU = j_IU+n;
         end
-        J_record(i,3) = j_IU;
+        J_record(i,3) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % 紧接着提取IN 展开的数据
         disp('是否有未记录的UI展开？')
@@ -347,7 +347,7 @@ if yes_ramp == '1'
             end
             j_UI = j_UI+n;
         end
-        J_record(i,4) = j_UI;
+        J_record(i,4) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %跳出循环的总开关
         elseif strcmp(good_data,'exit')
@@ -362,6 +362,7 @@ if yes_ramp == '1'
     z_IN(z_IN==0)=[];
     z_IU(z_IU==0)=[];
     z_UI(z_UI==0)=[];
+    
     force_ramp_name = strcat('force_ramp_NI',name_save,'_',loading_rate);
     save(strcat(force_ramp_name,'.mat'), 'z_NI','z_IN','z_IU','z_UI','J_record','trajectory_count');
 
