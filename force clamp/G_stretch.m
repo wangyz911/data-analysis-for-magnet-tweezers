@@ -28,7 +28,7 @@ b = 1.5;
 f0 = 800;
 
 %  公式主体
-ssDNA_length2 =@(f) n*l_1*( coth( f*b/kBT )- kBT./(f*b) ).*(1+f/f0);
+ssDNA_length2 =@(f) n*l_1*( coth( f*b./kBT )- kBT./(f*b) ).*(1+f./f0);
 %% 计算拉伸功
 G_G4 = integral(x_G4,0,fc);
 G_ss = integral(ssDNA_length2,0,fc);

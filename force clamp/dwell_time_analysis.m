@@ -199,8 +199,8 @@ if yes_or_no_string1=='1'                                                  %计算
 
 fileID = fopen('step_and_std.txt','a');
 fileID2 = fopen('time_domination.txt','a');
-fprintf(fileID,'%6s %12s\n','step','step_std');
-fprintf(fileID,'%6s %12s %12s\n','fold','mid','unfold');
+fprintf(fileID,'%8s %12s\n','step','step_std');
+fprintf(fileID2,'%6s %12s %12s\n','fold','mid','unfold');
     
 
     while mean_mag < (step_end_y+0.001)                                                        %反复分段，直到分完
@@ -214,7 +214,8 @@ fprintf(fileID,'%6s %12s %12s\n','fold','mid','unfold');
             % 对data_z进行step-detect 工作，结果用于后面的分析。
             step_position = J_search(data_z,0.7);
             % 对 data_z进行步长分析，提取出拟合参数
-            [ data_d,step,step_std,~] = step_modulation( data_z,step_position);
+            [ data_d,step,step_std,~,good1] = step_modulation( data_z,step_position);
+            if good1==1
             % 生成图像后马上保存图像
             step_fig_name = strcat('step',num2str(time_number),'.fig');
             h = gcf;
@@ -258,6 +259,7 @@ fprintf(fileID,'%6s %12s %12s\n','fold','mid','unfold');
             % clear data_4_analysis;
             % clear data_input;
             end
+            end
 % 进入下一循环，技术+1，步长加一级            
             deal_number=deal_number+1;
             time_number=time_number+1;
@@ -274,9 +276,9 @@ fprintf(fileID,'%6s %12s %12s\n','fold','mid','unfold');
    disp('how many states are the system ? ');
    states =str2double(input('states = ? ','s'));
    if states==2
-       [ dx_f,dG0_f,dx_u,dG0_u,k0_u,k0_f,G0,G0_u_minus_f,G0_uf,s_u,s_f ] = FC_calculate_2( dwell_time_curve,T );
+       [ dx_f,dG0_f,dx_u,dG0_u,k0_u,k0_f,G0,G0_u_minus_f,G0_uf] = FC_calculate_2( dwell_time_curve,T );
    elseif states ==3
-       [ dx_f,dG0_f,dx_u,dG0_u,k0_u,k0_f,G0,G0_u_minus_f,G0_uf,s_u,s_f ] = FC_calculate_2( dwell_time_curve,time_domination,T );
+       [ dx_f,dG0_f,dx_u,dG0_u,k0_u,k0_f,G0,G0_u_minus_f,G0_uf] = FC_calculate_3( dwell_time_curve,T );
    else
        
    end

@@ -1,4 +1,4 @@
-function [ fitted_data,stepsize,step_std,state_find ] = step_modulation( data_z,step_position)
+function [ fitted_data,stepsize,step_std,state_find,good ] = step_modulation( data_z,step_position)
 % 本函数用来对最小卡方查找step的方法进行一些补充，通过鼠标确认到底有几个台，阈值位置在哪儿，然后对属于同一个态的小step进行值的平均和长度的叠加。
 %参数介绍：输入参数：data_z是原始数据，用来对照fitted_data
 %的拟合情况。step_position是step_detect的第一步结果。
@@ -15,6 +15,11 @@ fitted_data = get_fitted_data(data_z,step_position);
 N = size(data_z,1);
 figure;
 plot(1:N,data_z,1:N,fitted_data,'LineWidth',2);
+%判定是否好数据，是否需要分析
+disp('good data ?')
+good = str2double(input('1 or 0','s'));
+if good == 1
+    
 % 确定有多少个态
 disp('how many states ?')
 state_num = str2double(input('states = ','s'));
@@ -52,4 +57,10 @@ for k = 1:state_num
 end;
 
 plot((1:N)./60,data_z,(1:N)./60,fitted_data,'LineWidth',2);
-
+else
+    fitted_data=0;
+    stepsize=0;
+    step_std=0;
+    state_find=0;
+    
+end

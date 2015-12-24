@@ -1,4 +1,4 @@
-function [ G0,G0_uf ] = G0_modi( lnK,F,T,dx_uf)
+function [ G0,G0_uf,nt ] = G0_modi( lnK,F,T,dx_uf)
 %本函数用来消除计算出的势垒中外力拉伸功的影响， 得到自然情况下的能量势垒值。
 % 参数说明：K为k_f/k_u，F伪对应的力值向量，nt为单链的核苷酸数（结构的核苷酸数？），T为温度
 %% 首先进行拟合

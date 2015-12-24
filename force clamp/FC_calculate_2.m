@@ -1,4 +1,4 @@
-function [ dx_f,dG0_f,dx_u,dG0_u,k0_u,k0_f,G0,G0_u_minus_f,G0_uf] = FC_calculate_2( dwell_time_curve,T )
+function [ dx_f,dG0_f,dx_u,dG0_u,k0_u,k0_f,G0,G0_u_minus_f,G0_uf,nt] = FC_calculate_2( dwell_time_curve,T )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 force_line = dwell_time_curve(:,3);
@@ -24,12 +24,12 @@ k0_u = exp(-dG0_u);
 % 自由能还需要减去单链的拉伸自由能和G4拉伸自由能等等，统称G_stretch
 lnK = k_u_log./k_f_log;
 dx_uf = dx_u-dx_f;
-[G0,G0_uf] = G0_modi(lnK,force_line,T,dx_uf);
+[G0,G0_uf,nt] = G0_modi(lnK,force_line,T,dx_uf);
 %另一种方法计算出的G0
 G0_u_minus_f = dG0_u - dG0_f;
 
 
-save('dwell_time_results.mat','dx_f','dG0_f','dx_u','dG0_u','k0_u','k0_f','G0','G0_u_minus_f','G0_uf');
+save('dwell_time_results.mat','dx_f','dG0_f','dx_u','dG0_u','k0_u','k0_f','G0','G0_u_minus_f','G0_uf','nt','T');
 %作图
     figure;
     hold on;
