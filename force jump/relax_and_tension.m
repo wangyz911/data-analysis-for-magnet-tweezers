@@ -153,22 +153,23 @@ figure('Name',name_save);
 
 %% eliminate the effects of drifting.
 DNA_z_position_modi=DNA_z_position - ref_DNA_z_position;
-fit_DNA=medfilt1(DNA_z_position_modi,20);
-DNA_z_wavelet=sigDEN5(DNA_z_position_modi);
+
+
+DNA_z_wavelet=sigDEN(DNA_z_position_modi);
 subplot(2,1,1);
-plot(time(start_number:end_number),DNA_z_position_modi(start_number:end_number),'b');
+plot(time(start_number:end_number),DNA_z_position_modi(start_number:end_number)-0.5,'b');
 hold on
-plot(time(start_number:end_number),DNA_z_wavelet(start_number:end_number),'r');
-xlabel('time(min)');ylabel('z_position_modi');
+plot(time(start_number:end_number),DNA_z_wavelet(start_number:end_number)-0.5,'r');
+xlabel('Time(min)');ylabel('Ext.(μm)');
 hold off
 subplot(2,1,2);
-plot(time(start_number:end_number),magnet_z_position(start_number:end_number));
-xlabel('time(min)');ylabel('magnet');
+plot(time(start_number:end_number),force_zmag_che(magnet_z_position(start_number:end_number)));
+xlabel('Time(min)');ylabel('Force(pN)');
 
 %%  利用find函数找出绷紧态区间的数据，并且分段,由于代码原因，最后一段提不出来，可选择测量结束是人工再提到-0.3
 %找出绷紧态, 注意zmag值都是负的，要用加号
-%绷紧态坐标，可修改
-tensin_position = -0.2750 ;
+%绷紧态坐标，使用代码前需要按实际情况修改
+tensin_position = -0.2980 ;
 tension_index = find(abs(magnet_z_position(start_number:end_number) - tensin_position) < 0.002);
 
 %对绷紧态进行差分，差分数来大于1的坐标点就是断点

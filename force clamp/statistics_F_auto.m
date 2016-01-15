@@ -1,4 +1,4 @@
-% G4 data analysis
+% G4 data analysis  比卡方估计效果好还快
 %% -------------------------读取数据文件---------------------------
 clear;close all;
 disp('###########################程序处理的流程############################')
@@ -158,11 +158,12 @@ subplot(2,1,1);
 plot(time(start_number:end_number),DNA_z_position_modi(start_number:end_number),'b');
 hold on
 plot(time(start_number:end_number),DNA_z_wavelet(start_number:end_number),'r');
-xlabel('time(min)');ylabel('z_position_modi');
+xlabel('Time(min)');ylabel('Ext.(μm)');
 hold off
 subplot(2,1,2);
-plot(time(start_number:end_number),magnet_z_position(start_number:end_number));
-xlabel('time(min)');ylabel('magnet');
+force_clamp = (force_zmag_che(magnet_z_position(start_number:end_number)));
+semilogy(time(start_number:end_number),force_clamp);
+xlabel('Time(min)');ylabel('Force(pN)');
 % subplot(3,1,3)
 % plot(time(start_number:end_number),fit_DNA(start_number:end_number));
 % xlabel('time(min)');ylabel('z_position_filt');
@@ -204,7 +205,7 @@ if yes_or_no_string1=='1'                                                  %计算
             mean_mag = step_first_y(1,1);
         end
             %设置步长
-            stepsize = 0.01;
+            stepsize = 0.02;
              %预设置力值曲线的矩阵，大小由分析区间和台阶大小决定
             force_curve=zeros(ceil((step_end_y-step_first_y)/stepsize),4);            %力值曲线，分别用来保存，力值，校准长度的力值，长度。
    %预设好作图和计算的各种参数         
@@ -222,7 +223,7 @@ if yes_or_no_string1=='1'                                                  %计算
             step_mag = step_mag(step_mag >start_number&step_mag <end_number);
 
             data_z=DNA_z_position_modi(step_mag);                             %同时提取修正的Z信息和小波滤波的Z信息
-            data_d=sigDEN(data_z);                                                       %指令化的3级小波滤波，须在建立文件夹后第一时间将sigDEN函数文件拷到该文件夹。,五级滤掉太多了，统计图很难看。
+            data_d=sigDEN5(data_z);                                                       %指令化的3级小波滤波，须在建立文件夹后第一时间将sigDEN函数文件拷到该文件夹。,五级滤掉太多了，统计图很难看。
             data_y=DNA_y_position_modi(step_mag)';                           %得到y方向的波动数据，这一数据不能滤波
 %             data_x=DNA_x_position_modi(step_mag)';
             % data_cal=data+(DNA_length-mean(data_d));
@@ -265,7 +266,7 @@ if yes_or_no_string1=='1'                                                  %计算
             
             save(new_data_name,'data_z');                                                %同时保存修正的Z信息和小波滤波的Z信息
             save(new_data_d_name,'data_d');                                            %存储并不等于写入，在载入上有着微妙的差别
-            save(new_data_name_y,'data_y');
+%             save(new_data_name_y,'data_y');
             % clear data_4_analysis;
             % clear data_input;
             deal_number=deal_number+1;

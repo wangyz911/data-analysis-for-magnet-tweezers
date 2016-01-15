@@ -150,7 +150,7 @@ xlabel('time(min)');ylabel('magnet');
 disp('---------------需要做步长统计吗？0-不需要；1-需要')
 yes_or_no_string1=input('judge1=','s');                                    %*
 if yes_or_no_string1=='1'                                                  %计算了就画图，没计算就不画
-    new_file_name=strcat(PathName,name_save,'new_hist','_',date,'\');
+    new_file_name=strcat(PathName,name_save,'chi_hist','_',date,'\');
     mkdir(new_file_name);                                                      %新建文件夹
     subplot(2,1,1);
     plot(DNA_z_position_modi(start_number:end_number),'DisplayName','DNA_z_position','YDataSource','DNA_z_position');grid on;
@@ -212,7 +212,7 @@ if yes_or_no_string1=='1'                                                  %计算
             %             force=force_estimate(data_y,data_cal_mean); 
 %             force=Kb_multi_T*data_z_mean*1.0e-3/var_correction(data_y,T);    %力值计算，其中对方差进行了积分时间修正
             %除以1000，单位换算，最后单位是纳米，F单位是pN,为什么+1.4(1.4是2.8微米的球的半径，加上之后才是摆长)
-            force = force_zmag(mean_mag);                                  %用force zmag的关系间接得到force，因为短链的力算不准。
+            force = force_zmag_che(mean_mag);                                  %用force zmag的关系间接得到force，因为短链的力算不准。
             force_curve(force_number,1)=force_number;                      %force_curve第1列标明序号
             force_curve(force_number,2)=data_z_mean;                       %force_curve 第2列输入Z值，也就是extension
             force_curve(force_number,3)=force;                             %第3列输入计算出的力值，即force
@@ -240,7 +240,7 @@ if yes_or_no_string1=='1'                                                  %计算
             
             save(new_data_name,'data_z');                                                %同时保存修正的Z信息和小波滤波的Z信息
             save(new_data_d_name,'data_d');                                            %存储并不等于写入，在载入上有着微妙的差别
-            save(new_data_name_y,'data_y');
+%             save(new_data_name_y,'data_y');
             % clear data_4_analysis;
             % clear data_input;
             deal_number=deal_number+1;

@@ -161,7 +161,7 @@ subplot(2,1,1);
 plot(time(start_number:end_number),DNA_z_position_modi(start_number:end_number),'b');
 hold on
 plot(time(start_number:end_number),DNA_z_wavelet(start_number:end_number),'r');
-xlabel('time(min)');ylabel('z_position_modi');
+xlabel('time(min)');ylabel('Ext.(μm)');
 hold off
 subplot(2,1,2);
 plot(time(start_number:end_number),magnet_z_position(start_number:end_number));
@@ -189,7 +189,7 @@ if yes_or_no_string1=='1'                                                  %计算
     T = input('T = ','s');
     T = str2double(T);
     %设置步长
-    stepsize = 0.01;
+    stepsize = 0.02;
     %预设好作图和计算的各种参数
     
     force_number=1;                                                                  %总序号，力值曲线需要用
@@ -206,9 +206,9 @@ if yes_or_no_string1=='1'                                                  %计算
         %初始磁铁位置等于起点的y坐标
         mean_mag = step_first_y(1,1);
     end
-    centers_seq = zeros(round((step_end_y-step_first_y)/stepsize),16);
-    y_seq = zeros(round((step_end_y-step_first_y)/stepsize),16);
-    E = zeros(round((step_end_y-step_first_y)/stepsize),16);
+    centers_seq = zeros(round((step_end_y-step_first_y)/stepsize),100);
+    y_seq = zeros(round((step_end_y-step_first_y)/stepsize),100);
+    E = zeros(round((step_end_y-step_first_y)/stepsize),100);
     deal_number = 1;
 
     
@@ -222,19 +222,23 @@ if yes_or_no_string1=='1'                                                  %计算
         step_mag = step_mag(step_mag >start_number&step_mag <end_number);
         %得到序号对应的data_z, data_y ,磁铁位置
         %计算力值
-        force = force_zmag(mean_mag);                                  %用force zmag的关系间接得到force，因为短链的力算不准。
+        force = force_zmag_che(mean_mag);                                  %用force zmag的关系间接得到force，因为短链的力算不准。
         data_z=DNA_z_position_modi(step_mag);                             %同时提取修正的Z信息和小波滤波的Z信息
-        data_d=sigDEN(data_z);
+        data_d=sigDEN5(data_z);
         data_z_mean=mean(data_d);           %Z方向均值，即L
-        [counts,centers] = hist(data_d,16);
+        h = histogram(data_d);
+        h.Normalization = 'probability';
+        centers = h.BinEdges;
+        P = h.Values;
+        
         %依据玻尔兹曼分布的能量与出现几率的关系，求出每个bin对应的能量值。（误差方面怎么算？）
         %概率归一化
-        P = counts./sum(counts);
-        E(deal_number,:)= -log(P');
+%         P = counts./sum(counts);
+        E(deal_number,:)= -log(P);
         y_seq(deal_number,:)= force;
         centers_seq(deal_number,:) = centers;
 %         %3D 作图
-%         grid on
+%         grid onw
 %         plot3(centers,y_seq,E);
 %         hold on;
         mean_mag = mean_mag + stepsize;
@@ -246,10 +250,10 @@ end
 % [X,Y] = meshgrid(min(centers_seq(:,1),min(min(y_seq)):0.01:max(max(y_seq)));
 % E_plot = griddata(centers_seq,y_seq,E,X,Y,'v4');
 %         mesh(X,Y,E_plot);
-
+hold on 
 mesh_figure(centers_seq,y_seq,E);
         
 
-xlabel('extension / μm');
-ylabel('force / pN');
-zlabel('landscape / kBT');
+xlabel('Ext. (μm)');
+ylabel('force (pN)');
+zlabel('Landscape (kBT)');

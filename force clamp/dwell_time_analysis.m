@@ -14,7 +14,8 @@ while  judge
     standard_string=fread(fid,4,'*char')';                                 %4个一组依次读取文件中的字符，与strcmp结合用来判断数据起始点'-a!'
     judge=~strcmp(standard_string(2:4),'-a!');
 end
-fgetl(fid);                                                                %去掉字符头，开始读取数据
+fgetl(fid);                                      
+%去掉字符头，开始读取数据
 DNA_x_position_array=textscan(fid,'%f%f');                                 %开始读取数据,生成一个两个列向量构成的元胞矩阵，第一个列向量是帧序列，第二个是位置信息
 frame_seriels=DNA_x_position_array{1,1};                                   %读取DNAx方向帧序列
 DNA_x_position=DNA_x_position_array{1,2};                                  %读取x方向位置信息
@@ -137,11 +138,11 @@ subplot(2,1,1);
 plot(time(start_number:end_number),DNA_z_position_modi(start_number:end_number),'b');
 hold on
 plot(time(start_number:end_number),DNA_z_wavelet(start_number:end_number),'r');
-xlabel('time(min)');ylabel('z_position_modi');
+xlabel('Time(min)');ylabel('Ext.(μm)');
 hold off
 subplot(2,1,2);
 plot(time(start_number:end_number),magnet_z_position(start_number:end_number));
-xlabel('time(min)');ylabel('magnet');
+xlabel('Time(min)');ylabel('Magnet');
 % subplot(3,1,3)
 % plot(time(start_number:end_number),fit_DNA(start_number:end_number));
 % xlabel('time(min)');ylabel('z_position_filt');
@@ -150,7 +151,7 @@ xlabel('time(min)');ylabel('magnet');
 disp('---------------需要做步长&驻留时间统计吗？0-不需要；1-需要')
 yes_or_no_string1=input('judge1=','s');                                    %*
 if yes_or_no_string1=='1'                                                  %计算了就画图，没计算就不画
-    new_file_name=strcat(PathName,name_save,'new','_',date,'\');
+    new_file_name=strcat(PathName,name_save,'dwelltime','_',date,'\');
     mkdir(new_file_name);                                                      %新建文件夹
     cd(new_file_name);                                                         %改变当前路径至
     

@@ -222,6 +222,9 @@ disp('是否分析 force ramp 曲线？')
 yes_ramp = input('是或者否','s');
 if yes_ramp == '1' 
     
+    new_file_name=strcat(PathName,name_save,'FR3','_',date,'\');
+    mkdir(new_file_name);                                                      %新建文件夹
+    cd(new_file_name);                                                         %改变当前路径至
     %可选择从第几段开始分析
     disp('从第几段开始进行分析？(第一次只能从头开始)')
     yes_segment = input('第几段 = ','s');
@@ -250,11 +253,18 @@ if yes_ramp == '1'
         %看图决定是否估计，如果图像不好就弃掉，如果好进行估计
         %需要有一个是否处理的总开关
         disp(num2str(i))
-        disp('good data ? ？')
+        disp('good data  ？')
         
         good_data = input('good or bad','s');
         if good_data =='1'
-        %然后是每一种数据是否记录                    
+            %数据好的话保存下来
+            new_data_name=strcat('data_',num2str(i),'.mat');
+            save(new_data_name,'data_ramp','force_ramp','data_ramp_d');
+            new_fig_name=strcat('data_',num2str(i),'.fig');
+            h = gcf;
+            saveas(h,new_fig_name,'fig');
+        %然后是每一种数据是否记录
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %提取NI部分的展开数据
         disp('是否有未记录的NI展开？')
@@ -280,7 +290,7 @@ if yes_ramp == '1'
         end
         J_record(i,1) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % 紧接着提取IN 展开的数据
+        % 紧接着提取IN 展开的数据(如果找的是3态，这里防止的是第二次跳跃)
         disp('是否有未记录的IN展开？')
         disp(num2str(i))
         disp('IN')
@@ -303,7 +313,7 @@ if yes_ramp == '1'
         end
         J_record(i,2) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % 紧接着提取IU 展开的数据
+        % 紧接着提取IU 展开的数据（如果找的是3态，这里放置的是第3次跳跃）
         disp('是否有未记录的IU展开？')
         disp(num2str(i))
         disp('IU')
@@ -326,7 +336,7 @@ if yes_ramp == '1'
         end
         J_record(i,3) = n;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % 紧接着提取IN 展开的数据
+                % 紧接着提取IN 展开的数据（通常为0，或者第四次跳跃，回跳目前不记录）
         disp('是否有未记录的UI展开？')
         disp(num2str(i))
         disp('UI')

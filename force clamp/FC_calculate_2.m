@@ -22,7 +22,7 @@ dx_u = fit_unfold(1)*Kb_T;
 dG0_u = -fit_unfold(2);
 k0_u = exp(-dG0_u);
 % 自由能还需要减去单链的拉伸自由能和G4拉伸自由能等等，统称G_stretch
-lnK = k_u_log./k_f_log;
+lnK = k_u_log - k_f_log;
 dx_uf = dx_u-dx_f;
 [G0,G0_uf,nt] = G0_modi(lnK,force_line,T,dx_uf);
 %另一种方法计算出的G0

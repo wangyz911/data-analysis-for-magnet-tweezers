@@ -7,7 +7,7 @@ figure;
 hold on
 i = 0;
 
-% 本部分每导入一次数据，手动运行一次
+%% 本部分每导入一次数据，手动运行一次
 switch i
     case 0
         data_0 = data_ramp+0.1*i;
@@ -82,8 +82,9 @@ switch i
     otherwise
         disp('need to add code');
 end
+%% 最终出图
 
-        plot(force_0,data_0);
+        plot(force_0,data_0+0.1);
         plot(force_1,data_1);
         plot(force_2,data_2);
         plot(force_3,data_3);
